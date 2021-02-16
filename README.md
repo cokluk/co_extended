@@ -12,7 +12,7 @@ Server tarafı scriptler için
 
 ```
 
-TriggerClientEvent('co_logger:client:CoLog', source, { type = 'INSERT', tablo = 'co_logger' , tip = 'twitter', veri = 'Bir post paylaştı.' , tarih = os.date() })
+TriggerClientEvent('co_logger:client:CoLog', source, { tip = 'twitter', veri = 'Bir post paylaştı.' , tarih = os.date() })
   
   
 ```
