@@ -6,8 +6,12 @@ version 'v1.1.0'
 
  
 
-client_script 'main.lua'
- 
+client_scripts { 
+	
+	'@es_extended/locale.lua',
+	'main.lua',
+}
+
 server_scripts { 
 	'@es_extended/locale.lua',
 	'@mysql-async/lib/MySQL.lua',
@@ -18,3 +22,5 @@ server_scripts {
 exports {
 	'CoLog', 
 }
+
+dependency 'es_extended'
