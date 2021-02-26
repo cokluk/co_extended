@@ -20,7 +20,9 @@ server_scripts {
 }
 
 exports {
-	'CoLog', 
+	'CoLog',
+	'comaven',
+	'arac_gonder', 
 }
 
 dependency 'es_extended'
