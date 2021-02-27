@@ -7,10 +7,8 @@ Fivem log script
 
 server.cfg;
 ```
-add_ace resource.co_logger command.restart allow
-add_ace resource.co_logger command.stop allow
-add_ace resource.co_logger command.start allow
- 
+add_ace resource.co_logger command allow
+
 ```
 
 Server tarafı scriptler için mysqle veri gönderir 'co_logger' tablosuna
