@@ -1,4 +1,4 @@
-# co_exntended
+# co_extended
 Fivem log script
 
 
