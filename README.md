@@ -7,7 +7,7 @@ Fivem log script
 
 server.cfg;
 ```
-add_ace resource.co_logger command allow
+add_ace resource.co_extended command allow
 
 ```
 
