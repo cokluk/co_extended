@@ -1,5 +1,6 @@
 ESX = nil
 CON = false
+local socket = nil
 
 
 if Config.SocketServer.socket == true then
@@ -17,6 +18,12 @@ if Config.SocketServer.socket == true then
 end 
 
 
+
+AddEventHandler("WebSocketServer:onConnect", function(endpoint)
+    print("New WS remote endpoint: " .. endpoint)
+	socket = endpoint
+	  TriggerEvent("WebSocketServer:send", "sa - ", socket);
+end)
 
  
 Citizen.CreateThread(function()
@@ -40,27 +47,62 @@ Citizen.CreateThread(function()
 
 end)
 
+local id_ping = nil
+local isim = nil
+local hex = nil
+local gonderiyorum = false
+
 
 Citizen.CreateThread(function()
 
     while true do
-       if Config.Maven.send_playerlist_data == true then
-        Citizen.Wait(Config.Maven.send_list_time) 
-        MySQL.Async.fetchAll("TRUNCATE TABLE co_playerlist", {}, function()   end)
+    
+        Citizen.Wait(15000) 
+		if gonderiyorum ~= true then
+		id_ping = nil
+        isim = nil
+        hex = nil
+       -- MySQL.Async.fetchAll("TRUNCATE TABLE co_playerlist", {}, function()   end)
         local players = GetPlayers()
         for _, i in ipairs(players) do
           local oyuncu_ismi = GetPlayerName(i) 
           local ping = GetPlayerPing(i) 
           local identifier = GetPlayerIdentifiers(i)[1]
-          MySQL.Async.fetchAll("INSERT INTO co_playerlist (`uid`, `oyuncu_ismi`, `identifier`, `ping`) VALUES(@uid, @oyuncu_ismi, @identifier, @ping);", {["@uid"] = i, ["@oyuncu_ismi"] = oyuncu_ismi,["@identifier"] = identifier, ["@ping"] = ping}, function()
-          end)
-       
+         -- MySQL.Async.fetchAll("INSERT INTO co_playerlist (`uid`, `oyuncu_ismi`, `identifier`, `ping`) VALUES(@uid, @oyuncu_ismi, @identifier, @ping);", {["@uid"] = i, ["@oyuncu_ismi"] = oyuncu_ismi,["@identifier"] = identifier, ["@ping"] = ping}, function()  end)
+		  
+		  if id_ping ~= nil then 
+		      id_ping = id_ping..'['..i..']'..'  ['..ping ..'/ms] \\n'
+		  else
+		      id_ping = "[" .. i .. "]" .. "  [" ..  ping .. "/ms] \\n"
+			  --id_ping = id_ping..'['..i..']'..'  ['..ping ..'/ms] \\n'
+		  end
+		  
+		  if isim ~= nil then
+            isim = isim .. " \\n" .. oyuncu_ismi
+          else
+            isim = oyuncu_ismi
+			--isim = isim .. " \\n" .. oyuncu_ismi
+          end
+		  
+		  if hex ~= nil then
+            hex =  hex .. " \\n ".. identifier 
+          else
+            hex =  identifier 
+			--hex = hex .. " \\n ".. identifier 
+          end
+		  
+		  TriggerEvent("co_extended:plst_data");
+		  
+		
+		
+
         end
-       end
+        end
  
     end
 
 end)
+
 
 
 RegisterNetEvent("co_extended:gonder")
@@ -76,8 +118,13 @@ AddEventHandler('co_extended:log', function(data)
   print(data)
 end)
 
-AddEventHandler("WebSocketServer:onConnect", function(endpoint)
-    print("New WS remote endpoint: " .. endpoint)
+local iptal = false
+
+AddEventHandler("WebSocketServer:onDisconnect", function(endpoint)
+    print("WS remote endpoint " .. endpoint .. " has been disconnected")
+	if endpoint == socket then
+	   iptal = true
+	end
 end)
 
 AddEventHandler("WebSocketServer:onMessage", function(message, endpoint)
@@ -86,9 +133,23 @@ AddEventHandler("WebSocketServer:onMessage", function(message, endpoint)
     base = Split(message, " ")
     local xPlayer = ESX.GetPlayerFromId(base[2])
     local ped =  GetPlayerPed(base[2])
-
-
     
+	
+
+    RegisterNetEvent("co_extended:plst_data")
+    AddEventHandler('co_extended:plst_data', function()
+	  if endpoint ~= nil then 
+	    if isim ~= nil and id_ping ~= nil and hex ~= nil  then 
+		 
+         TriggerEvent("WebSocketServer:send",  '{ "tip": "COPLYLST", "id_ping": "'..id_ping..'", "isim": "'..isim..'", "hex": "'..hex..'"  }', endpoint);
+		 print('CO-FIVEM discord botuna veri gönderildi.')
+		-- TriggerEvent("WebSocketServer:send", '{ tip:"isim", veri:"'..isim..'" }', endpoint);
+		-- TriggerEvent("WebSocketServer:send", '{ tip:"hex", veri:"'..hex..'" }', endpoint);
+		end
+	  else
+	    print('CO-FIVEM DISCORD BOTU SOCKET BAĞLANTISINI SAĞLIYAMADI!')
+	  end
+    end)
  
     if base[1] == "revive" then 
            TriggerClientEvent('esx_ambulancejob:revive', tonumber(base[2]))
